@@ -22,7 +22,7 @@ from polls import views
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('admin/', admin.site.urls),
-    path('accounts/', include('django.contrib.auth.urls')),  # <- подключаем встроенные URL'ы авторизации
+    path('accounts/', include('django.contrib.auth.urls')),
     path('', auth_views.LoginView.as_view(), name='login'),
     path('home/', views.home, name='home'),
     path('', include('polls.urls')),

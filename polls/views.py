@@ -21,8 +21,8 @@ def survey_view(request, survey_id):
     if request.method == 'POST':
         form = SurveyForm(survey, request.POST)
         if form.is_valid():
-            # Здесь можно обработать ответы, сохранить их или отправить куда-то
-            # Например, сохранить ответы в модели SurveyResponse и Choice
+            # Здесь можно обработать ответы, сохранить их или отправить
+            # Например, сохранить ответы
             return render(request, 'polls/survey_complete.html')  # Страница с подтверждением
     else:
         form = SurveyForm(survey)
