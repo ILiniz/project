@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<!-- polls/survey_detail.html -->
+{% extends 'base_generic.html' %}
+
+{% block content %}
+  <h2>{{ survey.name }}</h2>
+  <p>{{ survey.description }}</p>
+  <form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">Отправить ответы</button>
+  </form>
+{% endblock %}
+</body>
+</html>
