@@ -19,7 +19,7 @@ class Question(models.Model):
         return self.text
 
 class Choice(models.Model):
-    question = models.ForeignKey(Question, related_name='Choices', on_delete=models.CASCADE, default=1)
+    question = models.ForeignKey(Question, related_name='choices', on_delete=models.CASCADE, default=1)
     text = models.CharField(max_length=255, default='text')
 
     def __str__(self):
