@@ -1,23 +1,37 @@
 <!DOCTYPE html>
+    {% load static %}
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
     <title>Основной шаблон</title>
 </head>
 <body>
     <header>
-        <h1>Добро пожаловать в систему</h1>
-        <!-- Тут может быть меню или другие элементы, которые повторяются на всех страницах -->
+        <h1>Опросы сотрудников</h1>
+        <nav class="navbar">
+            <div class="nav-left">
+                <ul>
+                    <li><a href="{% url 'home' %}">Главная</a></li>
+                </ul>
+            </div>
+            <div class="nav-right">
+                <ul>
+                    <li><a href="{% url 'profile' %}">Профиль</a></li>
+                    <li><a href="{% url 'logout' %}">Выйти</a></li>
+                </ul>
+            </div>
+        </nav>
     </header>
 
     <main>
         {% block content %}
-        <!-- Контент страницы будет вставлен сюда -->
+
         {% endblock %}
     </main>
 
     <footer>
-        <!-- Здесь может быть подвал или другие элементы, которые повторяются на всех страницах -->
+
     </footer>
 </body>
 </html>

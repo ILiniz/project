@@ -1,0 +1,212 @@
+html, body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+}
+
+header {
+    background-color: #333;
+    color: white;
+    padding: 1rem;
+}
+
+main {
+    max-width: 900px;
+    width: 100%;
+    margin: 2rem auto;
+    padding: 1rem;
+    background-color: white;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    border-radius: 10px;
+    flex: 1 0 auto;
+}
+
+footer {
+    background-color: #333;
+    color: white;
+    text-align: center;
+    padding: 1rem;
+    margin-top: 2rem;
+    flex-shrink: 0; /* Запрещает футеру сжиматься */
+}
+
+h2, h3 {
+    color: #333;
+}
+
+ul {
+    list-style-type: none;
+    padding: 0;
+}
+
+li {
+    background-color: #e0e0e0;
+    margin: 0.5rem 0;
+    padding: 1rem;
+    border-radius: 8px;
+    transition: background-color 0.3s;
+}
+
+li:hover {
+    background-color: #d0d0d0;
+}
+
+a {
+    color: #333;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+a:hover {
+    text-decoration: underline;
+}
+
+nav.navbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: #333;
+    padding: 0.5rem 1rem;
+}
+
+.navbar ul {
+    list-style: none;
+    display: flex;
+    gap: 15px;
+    margin: 0;
+    padding: 0;
+}
+
+.navbar a {
+    color: white;
+    text-decoration: none;
+    font-weight: bold;
+    background-color: transparent !important; /* убираем фон */
+    border: none;                  /* убираем рамку */
+    padding: 0.25rem 0.5rem;
+}
+
+.navbar a:hover {
+    background-color: rgba(255, 255, 255, 0.1); /* лёгкий эффект при наведении */
+    text-decoration: underline;
+}
+
+.navbar li {
+    background: none !important;
+    padding: 0;
+    margin: 0;
+}
+
+.navbar li a {
+    background: none !important;
+    border: none;
+    padding: 0.25rem 0.5rem;
+}
+
+footer {
+    background-color: #333;
+    color: white;
+    text-align: center;
+    padding: 1rem;
+    margin-top: 2rem;
+}
+
+.survey-container {
+    max-width: 700px;
+    margin: 2rem auto;
+    background-color: #fff;
+    padding: 2rem;
+    border-radius: 12px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.survey-title {
+    font-size: 1.8rem;
+    margin-bottom: 0.5rem;
+}
+
+.survey-description {
+    font-size: 1.1rem;
+    margin-bottom: 1.5rem;
+    color: #555;
+}
+
+.back-button {
+    background-color: #777;
+    color: #fff;
+    border: none;
+    padding: 0.5rem 1rem;
+    margin-bottom: 1rem;
+    cursor: pointer;
+    border-radius: 8px;
+}
+
+.back-button:hover {
+    background-color: #555;
+}
+
+.question-block {
+    margin-bottom: 1.5rem;
+}
+
+.question-text {
+    font-weight: bold;
+    margin-bottom: 0.5rem;
+}
+
+.choice-option {
+    margin-left: 1rem;
+}
+
+.feedback-block {
+    margin-top: 2rem;
+}
+
+.submit-button {
+    margin-top: 1.5rem;
+    padding: 0.6rem 1.2rem;
+    background-color: #0066cc;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+.submit-button:hover {
+    background-color: #004a99;
+}
+
+.no-choices {
+    color: red;
+    font-style: italic;
+}
+
+@media (max-width: 768px) {
+    main, .survey-container {
+        width: 90%;
+        margin: 1rem auto;
+        padding: 1rem;
+    }
+
+    .navbar {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .nav-left, .nav-right {
+        width: 100%;
+    }
+
+    .navbar ul {
+        flex-direction: column;
+        gap: 0.5rem;
+        margin-top: 0.5rem;
+    }
+
+    .navbar li a {
+        display: block;
+        padding: 0.5rem;
+    }
+}

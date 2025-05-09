@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+    {% extends 'base_generic.html' %}
+
+<head>
+    <meta charset="UTF-8">
+    <title>Спасибо за участие!</title>
+</head>
+<body>
+    {% block content %}
+    <h2>Спасибо за участие в опросе: "{{ survey.name }}"!</h2>
+    <p>Вот ваши ответы:</p>
+
+    <ul>
+    {% for answer in answers %}
+        <li>
+            Вопрос: {{ answer.question.text }} <br>
+            Ответ: {{ answer.choice.text }}
+        </li>
+    {% endfor %}
+    </ul>
+
+    {% if feedback %}
+        <p>Ваш отзыв: {{ feedback.text }}</p>
+        {% else %}
+        <p>Вы не оставили отзыв.</p>
+    {% endif %}
+
+        <a href="{% url 'home' %}">
+            <button type="button" class="submit-button">Вернуться на главную</button>
+        </a>
+    {% endblock %}
+</body>
+</html>

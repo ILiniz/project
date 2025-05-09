@@ -1,46 +1,94 @@
 <!DOCTYPE html>
 <html lang="en">
     {% extends 'base_generic.html' %}
+    {% load static %}
 <head>
     <meta charset="UTF-8">
     <title>{{ survey.name }}</title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
 </head>
 <body>
-<!-- polls/survey_detail.html -->
-
 
 {% block content %}
-  <h2>{{ survey.name }}</h2>
-  <p>{{ survey.description }}</p>
+<div class="survey-container">
 
-  <!-- Добавим эту кнопку на каждой странице -->
-  {% if not request.path == '/login/' %}  <!-- Здесь проверка на страницу авторизации -->
-    <button onclick="window.history.back()">Назад</button>
-  {% endif %}
+    <h2 class="survey-title">{{ survey.name }}</h2>
+    <p class="survey-description">{{ survey.description }}</p>
 
-  <form method="post">
-    {% csrf_token %}
+    {% if not request.path == '/login/' %}
+      <a href="{% url 'home' %}">
+        <button type="button" class="submit-button">На главную</button>
+    </a>
+    {% endif %}
 
-    <!-- Выводим вопросы и их варианты ответов -->
-    {% for item in questions_with_choices %}
-      <p>{{ item.question.text }}</p>
-      {% if item.choices %}
-        {% for choice in item.choices.all %}
-        <input type="radio" name="question_{{ item.question.id }}" value="{{ choice.id }}"> {{ choice.text }}<br>
-      {% endfor %}
-    {% else %}
-    <p>Нет вариантов ответа для этого вопроса</p>
-  {% endif %}
-{% endfor %}
+    <form id="survey-form">
+        {% csrf_token %}
 
-    <!-- Место для отзыва -->
-    <div>
-      <label for="feedback">Ваш отзыв:</label>
-      <textarea id="feedback" name="feedback" rows="4" cols="50"></textarea>
-    </div>
+        {% for item in questions_with_choices %}
+        <div class="question-block">
+            <p class="question-text">{{ item.question.text }}</p>
+            {% if item.choices %}
+                <div class="choices">
+                    {% for choice in item.choices.all %}
+                        <label class="choice-option">
+                            <input type="radio" name="question_{{ item.question.id }}" value="{{ choice.id }}">
+                            {{ choice.text }}
+                        </label><br>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <p class="no-choices">Нет вариантов ответа для этого вопроса</p>
+            {% endif %}
+        </div>
+        {% endfor %}
 
-    <button type="submit">Отправить ответы</button>
-  </form>
+        <div class="feedback-block">
+            <label for="feedback">Ваш отзыв:</label><br>
+            <textarea id="feedback" name="feedback" rows="4" cols="50"></textarea>
+        </div>
+
+        <button type="submit" class="submit-button">Отправить ответы</button>
+    </form>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const form = document.querySelector('#survey-form');;
+    if (!form) {
+        console.error('Форма не найдена!');
+        return;
+    }
+
+    form.addEventListener('submit', function (event) {
+        console.log('Форма отправлена через JS');
+        event.preventDefault();
+
+        const formData = new FormData(form);
+
+        fetch(window.location.href, {
+            method: 'POST',
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'X-CSRFToken': formData.get('csrfmiddlewaretoken')
+            },
+            body: formData
+        })
+        .then(response => {
+            response.json().then(data => {
+                if (data.redirect_url) {
+                    window.location.href = data.redirect_url;
+                } else {
+                    console.log("Ответ без редиректа", data);
+                }
+            });
+        })
+        .catch(error => {
+            console.error('Ошибка при отправке:', error);
+        });
+    });
+});
+</script>
+
 {% endblock %}
 </body>
 </html>
