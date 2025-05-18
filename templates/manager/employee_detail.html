@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+{% extends 'base_manager.html' %}
+
+{% block content %}
+  <h2>Информация о сотруднике</h2>
+
+  <div style="margin-bottom: 20px;">
+    <strong>ФИО:</strong> {{ employee.full_name }}<br>
+    <strong>Email:</strong> {{ employee.email }}<br>
+    <strong>Должность:</strong> {{ employee.position }}<br>
+    <strong>Отдел:</strong> {{ employee.department }}
+  </div>
+
+  <h3>Пройденные опросы</h3>
+  {% if answered_surveys %}
+    <ul>
+      {% for survey in answered_surveys %}
+        <li>
+          {{ survey.name }}
+          <a href="{% url 'view_user_answers' survey.id %}?user_id={{ employee.id }}" style="margin-left: 10px;">
+            Смотреть ответы
+          </a>
+        </li>
+      {% endfor %}
+    </ul>
+  {% else %}
+    <p>Сотрудник ещё не проходил опросы.</p>
+  {% endif %}
+{% endblock %}
+
+</body>
+</html>

@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+    {% extends "base_generic.html" %}
+{% block content %}
+
+<h2>Пройденные опросы</h2>
+
+{% if surveys %}
+  <ul style="padding-left: 0;">
+    {% for survey in surveys %}
+      <li style="display: flex; justify-content: space-between; align-items: center; background-color: #e0e0e0; padding: 1em; margin-bottom: 10px; border-radius: 8px;">
+        <div>
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <strong>{{ survey.name }}</strong>
+            {% if survey.user_answers.0.is_anonymous %}
+              <span style="font-size: 0.8em; color: gray;">(анонимно)</span>
+            {% endif %}
+          </div>
+          <em>{{ survey.description }}</em>
+        </div>
+        <div style="display: flex; gap: 15px;">
+          <a href="{% url 'reset_survey_progress' survey.id %}" style="color: red;">Сбросить прохождение</a>
+          <a href="{% url 'view_user_answers' survey.id %}">Просмотреть ответы</a>
+        </div>
+      </li>
+    {% endfor %}
+  </ul>
+{% else %}
+  <p>Вы ещё не проходили ни одного опроса.</p>
+{% endif %}
+
+{% endblock %}
+</body>
+</html>

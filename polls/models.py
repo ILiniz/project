@@ -7,6 +7,7 @@ class Survey(models.Model):
     name = models.CharField(max_length=100)  # Название опроса
     description = models.TextField()  # Описание опроса
     is_active = models.BooleanField(default=True)  # Статус (активен ли опрос)
+    allow_anonymous = models.BooleanField(default=False)
 
     def __str__(self):
         return self.name
@@ -30,6 +31,7 @@ class Answer(models.Model):
     question = models.ForeignKey(Question, on_delete=models.CASCADE)
     choice = models.ForeignKey(Choice, on_delete=models.CASCADE)
     survey = models.ForeignKey('Survey', on_delete=models.CASCADE)
+    is_anonymous = models.BooleanField(default=False)
 
     def __str__(self):
         return f"{self.user.username} - {self.question.text}: {self.choice.text}"
@@ -39,6 +41,7 @@ class Feedback(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     survey = models.ForeignKey(Survey, on_delete=models.CASCADE)
     text = models.TextField()
+    is_anonymous = models.BooleanField(default=False)
 
     def __str__(self):
         return f"Feedback from {self.user.username} on {self.survey.name}"

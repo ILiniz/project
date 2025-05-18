@@ -4,39 +4,63 @@ from django.shortcuts import render
 # core/views.py
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
-from .models import Survey, Answer, Feedback
+from .models import Survey, Answer, Feedback, CustomUser
 from .logic import (
     process_survey_submission,
     get_survey_questions_with_choices,
     get_user_answers_and_feedback
 )
+from .forms import SurveyForm
 from django.http import JsonResponse
 from django.urls import reverse
+from django.contrib.auth import logout
+from django.contrib import messages
+from django.shortcuts import redirect
+from django.db.models import Prefetch
+from django.contrib.auth.views import LoginView
+from django.urls import reverse_lazy
+from django.contrib.auth import get_user_model
+from django.http import Http404
+
 
 
 @login_required
 def home(request):
-    surveys = Survey.objects.filter(is_active=True)
-    return render(request, 'registration/home.html', {'surveys': surveys})
+    all_surveys = Survey.objects.filter(is_active=True)
+    completed_survey_ids = Answer.objects.filter(user=request.user).values_list('survey_id', flat=True).distinct()
+    available_surveys = all_surveys.exclude(id__in=completed_survey_ids)
+    return render(request, 'registration/home.html', {'surveys': available_surveys})
 
 
 @login_required
 def survey_detail(request, survey_id):
     survey = get_object_or_404(Survey, id=survey_id)
+    questions_with_choices = get_survey_questions_with_choices(survey)
 
     if request.method == 'POST':
-        process_survey_submission(request, survey)
-        request.session['last_survey_id'] = survey.id
 
-        # ➤ Отвечаем по-разному в зависимости от типа запроса
-        if request.headers.get('x-requested-with') == 'XMLHttpRequest':
-            return JsonResponse({'redirect_url': reverse('thanks', args=[survey.id])})
-        return redirect('thanks', survey_id=survey.id)
+        form = SurveyForm(survey, request.POST)
+
+        if form.is_valid():
+            # Обработка + сохранение
+            from .logic import process_survey_submission
+            process_survey_submission(request, survey)
+            return redirect('thanks', survey_id=survey.id)
+        else:
+            # Форма невалидна → остаёмся на той же странице, с ошибками
+            return render(request, 'registration/survey_detail.html', {
+                'survey': survey,
+                'questions_with_choices': questions_with_choices,
+                'form': form,
+                'form_errors': form.errors
+            })
 
     questions_with_choices = get_survey_questions_with_choices(survey)
+    form = SurveyForm(survey)
     return render(request, 'registration/survey_detail.html', {
         'survey': survey,
-        'questions_with_choices': questions_with_choices
+        'questions_with_choices': questions_with_choices,
+        'form': form
     })
 
 
@@ -53,4 +77,96 @@ def thanks(request, survey_id):
 
 @login_required
 def profile(request):
-    return render(request, 'registration/profile.html', {'user': request.user})
+    if request.user.role == 'manager':
+        return render(request, 'manager/profile.html', {'user': request.user})
+    else:
+        return render(request, 'registration/profile.html', {'user': request.user})
+
+@login_required
+def completed_surveys(request):
+    user_answers = Answer.objects.filter(user=request.user)
+    surveys = Survey.objects.filter(id__in=user_answers.values('survey_id').distinct())
+    surveys = surveys.prefetch_related(
+        Prefetch('answer_set', queryset=user_answers, to_attr='user_answers')
+    )
+    return render(request, 'registration/completed.html', {'surveys': surveys})
+
+def custom_logout(request):
+    logout(request)
+    messages.success(request, "Вы успешно вышли из системы.")
+    return redirect('login')
+
+@login_required
+def view_user_answers(request, survey_id):
+    survey = get_object_or_404(Survey, id=survey_id)
+    answers = Answer.objects.filter(user=request.user, survey=survey).select_related('question', 'choice')
+    feedback = Feedback.objects.filter(user=request.user, survey=survey).first()
+
+    if not answers.exists():
+        return redirect('completed')  # защита: если попытка открыть чужой/непройденный опрос
+
+    return render(request, 'registration/user_answers.html', {
+        'survey': survey,
+        'answers': answers,
+        'feedback': feedback
+    })
+
+@login_required
+def reset_survey_progress(request, survey_id):
+    survey = get_object_or_404(Survey, id=survey_id)
+    Answer.objects.filter(user=request.user, survey=survey).delete()
+    Feedback.objects.filter(user=request.user, survey=survey).delete()
+    messages.success(request, f"Ваши ответы на опрос '{survey.name}' были сброшены.")
+    return redirect('home')
+
+@login_required
+def role_redirect(request):
+    print("ROLE REDIRECT:", request.user.role)
+    if request.user.role == 'manager':
+        return redirect('manager_home')  # например
+    else:
+        return redirect('employee_home')  # сотрудник
+
+@login_required
+def employee_home(request):
+    all_surveys = Survey.objects.filter(is_active=True)
+    completed_survey_ids = Answer.objects.filter(user=request.user).values_list('survey_id', flat=True).distinct()
+    available_surveys = all_surveys.exclude(id__in=completed_survey_ids)
+    return render(request, 'registration/home.html', {'surveys': available_surveys})
+
+@login_required
+def manager_home(request):
+    employees = CustomUser.objects.filter(
+        department=request.user.department,
+        role='user'
+    )
+    return render(request, 'manager/home.html', {
+        'user': request.user,
+        'employees': employees
+    })
+
+class RoleBasedLoginView(LoginView):
+    def get_success_url(self):
+        return reverse_lazy('role_redirect')
+
+@login_required
+def employee_detail(request, user_id):
+    User = get_user_model()
+    try:
+        employee = User.objects.get(id=user_id, role='user')
+    except User.DoesNotExist:
+        raise Http404("Сотрудник не найден")
+
+    # Проверка: сотрудник должен быть из того же отдела
+    if employee.department != request.user.department:
+        raise Http404("Нет доступа к этому сотруднику")
+
+    # Получаем опросы, на которые он ответил
+    from .models import Survey, Answer
+    answered_survey_ids = Answer.objects.filter(user=employee).values_list('survey_id', flat=True).distinct()
+    answered_surveys = Survey.objects.filter(id__in=answered_survey_ids)
+
+    return render(request, 'manager/employee_detail.html', {
+        'employee': employee,
+        'answered_surveys': answered_surveys
+    })

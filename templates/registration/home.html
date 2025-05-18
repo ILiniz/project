@@ -9,14 +9,14 @@
   {% extends "base_generic.html" %}
 
   {% block content %}
-  <h2>Добро пожаловать на главную страницу!</h2>
+  <h2>Главная страница</h2>
     <h3>Текущие опросы:</h3>
     {% if surveys %}
       <ul>
             {% for survey in surveys %}
                 <li><a href="{% url 'survey_detail' survey.id %}">{{ survey.name }}</a></li>
             {% endfor %}
-        </ul>
+      </ul>
     {% else %}
       <p>На данный момент нет активных опросов.</p>
     {% endif %}

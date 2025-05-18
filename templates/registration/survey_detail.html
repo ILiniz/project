@@ -1,7 +1,7 @@
 <!DOCTYPE html>
+{% extends 'base_generic.html' %}
+{% load static %}
 <html lang="en">
-    {% extends 'base_generic.html' %}
-    {% load static %}
 <head>
     <meta charset="UTF-8">
     <title>{{ survey.name }}</title>
@@ -16,36 +16,51 @@
     <p class="survey-description">{{ survey.description }}</p>
 
     {% if not request.path == '/login/' %}
-      <a href="{% url 'home' %}">
-        <button type="button" class="submit-button">На главную</button>
-    </a>
+        <a href="{% url 'employee_home' %}">
+            <button type="button" class="submit-button">На главную</button>
+        </a>
     {% endif %}
 
-    <form id="survey-form">
+    {% if form_errors %}
+        <div id="popup-error" class="popup-error">
+            <div class="popup-content">
+                <button type="button" class="popup-close" aria-label="Закрыть">&times;</button>
+                <h3>Не все обязательные поля заполнены</h3>
+                <ul>
+                    {% for field in form %}
+                        {% if field.errors %}
+                            <li><strong>{{ field.label }}</strong> — {{ field.errors.0 }}</li>
+                        {% endif %}
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+    {% endif %}
+
+    <form id="survey-form" method="post" novalidate>
         {% csrf_token %}
 
-        {% for item in questions_with_choices %}
-        <div class="question-block">
-            <p class="question-text">{{ item.question.text }}</p>
-            {% if item.choices %}
-                <div class="choices">
-                    {% for choice in item.choices.all %}
-                        <label class="choice-option">
-                            <input type="radio" name="question_{{ item.question.id }}" value="{{ choice.id }}">
-                            {{ choice.text }}
-                        </label><br>
-                    {% endfor %}
+        {% for field in form %}
+            {% if field.name != 'feedback' and field.name != 'anonymous' %}
+                <div class="question-block">
+                    <p class="question-text"><strong>{{ field.label }}</strong></p>
+                    {{ field }}
                 </div>
-            {% else %}
-                <p class="no-choices">Нет вариантов ответа для этого вопроса</p>
             {% endif %}
-        </div>
         {% endfor %}
 
         <div class="feedback-block">
-            <label for="feedback">Ваш отзыв:</label><br>
-            <textarea id="feedback" name="feedback" rows="4" cols="50"></textarea>
+            {{ form.feedback.label_tag }}<br>
+            {{ form.feedback }}
         </div>
+
+        {% if form.anonymous %}
+        <div class="anonymous-block" style="margin-top: 10px;">
+            <label style="font-size: 14px;">
+                {{ form.anonymous }} {{ form.anonymous.label }}
+            </label>
+        </div>
+        {% endif %}
 
         <button type="submit" class="submit-button">Отправить ответы</button>
     </form>
@@ -53,39 +68,14 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', function () {
-    const form = document.querySelector('#survey-form');;
-    if (!form) {
-        console.error('Форма не найдена!');
-        return;
-    }
+    const popup = document.getElementById('popup-error');
+    const closeBtn = document.querySelector('.popup-close');
 
-    form.addEventListener('submit', function (event) {
-        console.log('Форма отправлена через JS');
-        event.preventDefault();
-
-        const formData = new FormData(form);
-
-        fetch(window.location.href, {
-            method: 'POST',
-            headers: {
-                'X-Requested-With': 'XMLHttpRequest',
-                'X-CSRFToken': formData.get('csrfmiddlewaretoken')
-            },
-            body: formData
-        })
-        .then(response => {
-            response.json().then(data => {
-                if (data.redirect_url) {
-                    window.location.href = data.redirect_url;
-                } else {
-                    console.log("Ответ без редиректа", data);
-                }
-            });
-        })
-        .catch(error => {
-            console.error('Ошибка при отправке:', error);
+    if (popup && closeBtn) {
+        closeBtn.addEventListener('click', function () {
+            popup.style.display = 'none';
         });
-    });
+    }
 });
 </script>
 

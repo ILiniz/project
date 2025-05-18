@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+    {% extends "base_generic.html" %}
+
+        {% block content %}
+        <h2>Ваши ответы на опрос: {{ survey.name }}</h2>
+
+        <ul>
+            {% for answer in answers %}
+            <li><strong>{{ answer.question.text }}</strong>: {{ answer.choice.text }}</li>
+            {% endfor %}
+        </ul>
+
+        {% if feedback %}
+            <p><strong>Отзыв:</strong> {{ feedback.text }}</p>
+        {% else %}
+            <p>Вы не оставили отзыв.</p>
+        {% endif %}
+
+        <p><a href="{% url 'completed' %}">← Назад к списку пройденных</a></p>
+    {% endblock %}
+</body>
+</html>

@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+{% extends 'base_manager.html' %}
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Главная — Руководитель</title>
+</head>
+<body>
+
+{% block content %}
+<h2>Добро пожаловать, {{ user.get_full_name }}</h2>
+<p>Вы руководитель отдела: <strong>{{ user.department }}</strong></p>
+
+<h3>Список сотрудников вашего отдела:</h3>
+
+{% if employees %}
+  <ul>
+    {% for emp in employees %}
+      <li style="display: flex; justify-content: space-between; align-items: center;">
+        <div>
+          <strong>{{ emp.full_name }}</strong><br>
+          {{ emp.email }}<br>
+          {{ emp.position }}
+        </div>
+        <a href="{% url 'employee_detail' user_id=emp.id %}" style="margin-left: 20px;">
+          Показать подробнее
+        </a>
+      </li>
+    {% endfor %}
+  </ul>
+{% else %}
+  <p>Нет сотрудников в вашем отделе.</p>
+{% endif %}
+
+<p>Функциональность будет доступна позже.</p>
+{% endblock %}
+
+</body>
+</html>

@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+    {% extends 'base_manager.html' %}
+    {% load static %}
+<head>
+    <meta charset="UTF-8">
+    <title>{{ survey.name }}</title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
+<body>
+    {% block content %}
+        <h2>Профиль пользователя</h2>
+            <ul>
+            <li><strong>Имя пользователя:</strong> {{ user.username }}</li>
+            <li><strong>ФИО:</strong> {{ user.full_name }}</li>
+            <li><strong>Email:</strong> {{ user.email }}</li>
+            <li><strong>Должность:</strong> {{ user.position }}</li>
+            <li><strong>Отдел:</strong> {{ user.department }}</li>
+            <li><strong>Роль:</strong> {{ user.get_role_display }}</li>
+            </ul>
+
+    {% endblock %}
+</body>
+</html>

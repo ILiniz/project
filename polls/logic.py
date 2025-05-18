@@ -16,8 +16,21 @@ def get_survey_questions_with_choices(survey):
 
 # Обработка отправки формы с опросом (ответы + отзыв)
 def process_survey_submission(request, survey):
+    from .forms import SurveyForm  # импортируем, если ещё не был
+
+    form = SurveyForm(survey, request.POST)
+    if not form.is_valid():
+        print("❌ Форма невалидна!")
+        print(form.errors)
+        request.session['form_errors'] = form.errors.as_json()
+        return  # можно добавить обработку ошибок при желании
+
+    # Получаем флаг анонимности
+    is_anonymous = form.cleaned_data.get('anonymous', False)
+
     # Удаляем старые ответы пользователя на этот опрос
     Answer.objects.filter(user=request.user, survey=survey).delete()
+    Feedback.objects.filter(user=request.user, survey=survey).delete()
 
     # Сохраняем новые ответы
     for question in survey.questions.all():
@@ -29,18 +42,20 @@ def process_survey_submission(request, survey):
                     user=request.user,
                     survey=survey,
                     question=question,
-                    choice=choice
+                    choice=choice,
+                    is_anonymous=is_anonymous
                 )
             except Choice.DoesNotExist:
-                continue  # Если вариант не найден, просто пропускаем
+                continue
 
-    # Обновляем или создаём отзыв
-    feedback_text = request.POST.get('feedback')
+    # Сохраняем отзыв
+    feedback_text = form.cleaned_data.get('feedback')
     if feedback_text:
-        Feedback.objects.update_or_create(
+        Feedback.objects.create(
             user=request.user,
             survey=survey,
-            defaults={'text': feedback_text}
+            text=feedback_text,
+            is_anonymous=is_anonymous
         )
 
 

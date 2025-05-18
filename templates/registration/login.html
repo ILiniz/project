@@ -1,11 +1,22 @@
 <!-- templates/registration/login.html -->
 <!DOCTYPE html>
+    {% load static %}
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
     <title>Вход в систему</title>
 </head>
 <body>
+    {% if messages %}
+        <div id="flash-messages">
+            {% for message in messages %}
+            <div class="flash-message {{ message.tags }}">
+                {{ message }}
+            </div>
+            {% endfor %}
+        </div>
+    {% endif %}
     <h2>Вход</h2>
     {% if form.errors %}
         <p style="color: red;">Неверный логин или пароль</p>

@@ -20,13 +20,13 @@
     {% endfor %}
     </ul>
 
-    {% if feedback %}
-        <p>Ваш отзыв: {{ feedback.text }}</p>
-        {% else %}
+    {% if feedback and feedback.text %}
+        <p><strong>Ваш отзыв:</strong> {{ feedback.text }}</p>
+    {% else %}
         <p>Вы не оставили отзыв.</p>
     {% endif %}
 
-        <a href="{% url 'home' %}">
+        <a href="{% url 'employee_home' %}">
             <button type="button" class="submit-button">Вернуться на главную</button>
         </a>
     {% endblock %}
