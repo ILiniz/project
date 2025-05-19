@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+{% extends 'base_manager.html' %}
+
+{% block content %}
+  <h2>Анонимные ответы: {{ survey.name }}</h2>
+
+  {% if answers %}
+    <ul>
+      {% for answer in answers %}
+        <li>
+          <strong>Вопрос:</strong> {{ answer.question.text }}<br>
+          <strong>Ответ:</strong> {{ answer.choice.text }}
+        </li>
+      {% endfor %}
+    </ul>
+  {% else %}
+    <p>На этот опрос ещё нет анонимных ответов.</p>
+  {% endif %}
+
+  <p><a href="{% url 'anonymous_surveys' %}">← Назад к списку анонимных опросов</a></p>
+{% endblock %}
+</body>
+</html>

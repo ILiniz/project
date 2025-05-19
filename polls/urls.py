@@ -12,5 +12,8 @@ urlpatterns = [
     path('survey/<int:survey_id>/reset/', views.reset_survey_progress, name='reset_survey_progress'),
     path('manager/home/', views.manager_home, name='manager_home'),
     path('manager/employee/<int:user_id>/', views.employee_detail, name='employee_detail'),
+    path('manager/anonymous-answers/', views.anonymous_surveys_view, name='anonymous_surveys'),
+    path('manager/anonymous-answers/<int:survey_id>/', views.anonymous_survey_detail, name='anonymous_survey_detail'),
+    path('manager/employee/<int:user_id>/survey/<int:survey_id>/answers/', views.view_employee_answers, name='employee_answers'),
 ]
 

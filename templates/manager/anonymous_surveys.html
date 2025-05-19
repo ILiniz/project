@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+{% extends 'base_manager.html' %}
+
+{% block content %}
+  <h2>Анонимные опросы</h2>
+
+  {% if surveys %}
+    <ul>
+      {% for survey in surveys %}
+        <li>
+          <a href="{% url 'anonymous_survey_detail' survey.id %}">
+            {{ survey.name }}
+          </a>
+        </li>
+      {% endfor %}
+    </ul>
+  {% else %}
+    <p>Нет анонимных опросов с ответами.</p>
+  {% endif %}
+
+<p><a href="{% url 'manager_home' %}">← Назад к списку сотрудников</a></p>
+
+{% endblock %}
+</body>
+</html>

@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+{% extends "base_manager.html" %}
+
+{% block content %}
+  <h2>Ответы сотрудника: {{ employee.full_name }}</h2>
+  <h3>Опрос: {{ survey.name }}</h3>
+
+  <ul>
+    {% for answer in answers %}
+      <li><strong>{{ answer.question.text }}</strong>: {{ answer.choice.text }}</li>
+    {% endfor %}
+  </ul>
+
+  {% if feedback %}
+    <p><strong>Фидбек:</strong> {{ feedback.text }}</p>
+  {% else %}
+    <p>Сотрудник не оставил отзыв.</p>
+  {% endif %}
+
+  <p><a href="{% url 'employee_detail' employee.id %}">← Назад к профилю сотрудника</a></p>
+{% endblock %}
+
+</body>
+</html>

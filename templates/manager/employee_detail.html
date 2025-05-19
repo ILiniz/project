@@ -23,7 +23,7 @@
       {% for survey in answered_surveys %}
         <li>
           {{ survey.name }}
-          <a href="{% url 'view_user_answers' survey.id %}?user_id={{ employee.id }}" style="margin-left: 10px;">
+          <a href="{% url 'employee_answers' employee.id survey.id %}" style="margin-left: 10px;">
             Смотреть ответы
           </a>
         </li>

@@ -117,13 +117,13 @@ def reset_survey_progress(request, survey_id):
     Answer.objects.filter(user=request.user, survey=survey).delete()
     Feedback.objects.filter(user=request.user, survey=survey).delete()
     messages.success(request, f"Ваши ответы на опрос '{survey.name}' были сброшены.")
-    return redirect('home')
+    return redirect('employee_home')
 
 @login_required
 def role_redirect(request):
     print("ROLE REDIRECT:", request.user.role)
     if request.user.role == 'manager':
-        return redirect('manager_home')  # например
+        return redirect('manager_home')  # руководитель
     else:
         return redirect('employee_home')  # сотрудник
 
@@ -157,16 +157,89 @@ def employee_detail(request, user_id):
     except User.DoesNotExist:
         raise Http404("Сотрудник не найден")
 
-    # Проверка: сотрудник должен быть из того же отдела
     if employee.department != request.user.department:
         raise Http404("Нет доступа к этому сотруднику")
 
-    # Получаем опросы, на которые он ответил
     from .models import Survey, Answer
-    answered_survey_ids = Answer.objects.filter(user=employee).values_list('survey_id', flat=True).distinct()
+
+    # Неанонимные опросы
+    answered_survey_ids = Answer.objects.filter(
+        user=employee,
+        is_anonymous=False  # ← ключевая проверка!
+    ).values_list('survey_id', flat=True).distinct()
+
     answered_surveys = Survey.objects.filter(id__in=answered_survey_ids)
+
+    # Анонимные
+    anonymous_survey_ids = Answer.objects.filter(
+        user=employee,
+        is_anonymous=True
+    ).values_list('survey_id', flat=True).distinct()
+
+    anonymous_surveys = Survey.objects.filter(id__in=anonymous_survey_ids)
 
     return render(request, 'manager/employee_detail.html', {
         'employee': employee,
-        'answered_surveys': answered_surveys
+        'answered_surveys': answered_surveys,
+        'anonymous_surveys': anonymous_surveys,
+    })
+
+@login_required
+def anonymous_surveys_view(request):
+    if request.user.role != 'manager':
+        raise Http404("Нет доступа")
+
+    # Все опросы, в которых были анонимные ответы
+    from .models import Survey, Answer
+    anonymous_survey_ids = Answer.objects.filter(
+        is_anonymous=True,
+        survey__allow_anonymous=True
+    ).values_list('survey_id', flat=True).distinct()
+
+    surveys = Survey.objects.filter(id__in=anonymous_survey_ids)
+
+    return render(request, 'manager/anonymous_surveys.html', {
+        'surveys': surveys
+    })
+
+@login_required
+def anonymous_survey_detail(request, survey_id):
+    if request.user.role != 'manager':
+        raise Http404("Нет доступа")
+
+    from .models import Survey, Answer
+    survey = get_object_or_404(Survey, id=survey_id, allow_anonymous=True)
+
+    answers = Answer.objects.filter(
+        survey=survey,
+        is_anonymous=True
+    ).select_related('question', 'choice')
+
+    return render(request, 'manager/anonymous_survey_detail.html', {
+        'survey': survey,
+        'answers': answers
+    })
+
+
+@login_required
+def view_employee_answers(request, user_id, survey_id):
+    if request.user.role != 'manager':
+        raise Http404("Нет доступа")
+
+    employee = get_object_or_404(CustomUser, id=user_id, role='user')
+
+    # Защита: сотрудник должен быть из отдела руководителя
+    if employee.department != request.user.department:
+        raise Http404("Нет доступа к сотруднику")
+
+    survey = get_object_or_404(Survey, id=survey_id)
+    answers = Answer.objects.filter(user=employee, survey=survey, is_anonymous=False).select_related('question',
+                                                                                                     'choice')
+    feedback = Feedback.objects.filter(user=employee, survey=survey, is_anonymous=False).first()
+
+    return render(request, 'manager/employee_answers.html', {
+        'employee': employee,
+        'survey': survey,
+        'answers': answers,
+        'feedback': feedback,
     })

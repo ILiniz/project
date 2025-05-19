@@ -282,3 +282,22 @@ footer {
     color: #900;
     cursor: pointer;
 }
+
+.anonymous-button {
+  display: inline-block;
+  margin-top: 30px;
+  padding: 12px 20px;
+  background-color: #2c3e50; /* тёмно-синий/серый */
+  color: white;
+  text-decoration: none;
+  border-radius: 6px;
+  font-weight: bold;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  transition: background-color 0.3s ease;
+}
+
+.anonymous-button:hover {
+  background-color: #1a252f; /* при наведении чуть темнее */
+  text-decoration: none;
+}
+
